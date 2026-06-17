@@ -135,13 +135,14 @@ def get_local_graph(case_number: str):
 
 
 def get_metrics():
-    base = run_query("""
-    MATCH (n)
+    base_rows = run_query("""
+    OPTIONAL MATCH (n)
     WITH count(n) AS nodes
-    MATCH ()-[r]->()
-    WITH nodes, count(r) AS rels
-    RETURN nodes, rels
-    """)[0]
+    OPTIONAL MATCH ()-[r]->()
+    RETURN nodes, count(r) AS rels
+    """)
+
+    base = base_rows[0] if base_rows else {"nodes": 0, "rels": 0}
 
     top_articles = run_query("""
     MATCH (:Case)-[:INVOLVES_ARTICLE]->(a:Article)
